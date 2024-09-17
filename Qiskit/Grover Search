@@ -1,0 +1,49 @@
+import qiskit as q
+from numpy import pi
+
+
+def GroverSearch(n_bits,ctrl_state):
+"""
+Function to perform a single grover search with an optimised number of steps based on the number of qubits.
+This function does not provide support for simulations- this must be done using simulators like Aer.
+
+Args:
+n_bits (Int): Number of qubits (not including the auxiliary qubit)
+ctrl_state (str): A list of bits defining the control state used in the oracle
+
+Returns:
+The quantum circuit after measurements on all qubits
+"""
+
+
+    #create circuit with auxiliary qubit for phase kickback
+    qc = q.QuantumCircuit(n_bits+1)
+    
+    #initalise using hadamard transform
+    for i in range(n_bits):
+        qc.h(i)
+    #auxiliary bit set up in |-> state
+    qc.x(n_bits)
+    qc.h(n_bits)
+    
+    def grover_operator():
+        #implement oracle
+        mcx = MCXGate(n_bits,ctrl_state=control_state)
+        qc.mcx(list(range(n_bits)),target_qubit = n_bits)
+
+        #Diffusion Operator
+        for i in range(n_bits):
+            qc.h(i)
+        mcx = MCXGate(n_bits)
+        qc.mcx(list(range(n_bits)),target_qubit=n_bits)
+        for i in range(n_bits):
+            qc.h(i)
+            
+    iterations = (pi/4)*((2**n_bits)**0.5)
+
+    for runs in range(int(iterations)):
+        grover_operator()
+        
+    qc.measure_all()
+    
+    return qc
