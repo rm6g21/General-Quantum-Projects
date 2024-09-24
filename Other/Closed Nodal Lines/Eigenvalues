@@ -1,0 +1,57 @@
+import numpy as np
+import matplotlib.pyplot as plt
+import scipy.sparse as sp
+import scipy.linalg
+from scipy.sparse.linalg import eigsh
+
+
+
+
+
+#Initialize Hamiltonian
+N=150
+
+x = np.linspace(-1,1,N)
+y = np.linspace(-1,1,N)
+
+X,Y = np.meshgrid(x,y)
+
+
+def get_potential(X,Y,n,square=True):
+    if square==True:
+        return 0*X
+    else:
+        condition = np.abs(X)**n + np.abs(Y)**n < 1
+        return np.where(condition, 0, 1e8)
+
+n_range= np.array([2,20,30,40,50,70,80,100,1e6])
+fig, axs = plt.subplots(1,len(n_range))
+
+for i in range(len(n_range)):
+    #Formulate D for kronecker product
+    V = get_potential(X,Y,n_range[i],square=False)
+    diag =np.ones(N)
+    diags = np.array([diag,-2*diag,diag])
+    D = sp.spdiags(diags,np.array([-1,0,1]),N,N)
+    T = -1*sp.kronsum(D,D)
+    V = sp.diags(V.reshape(N**2),0)
+    H = T + V
+
+    k = 10
+    #Get eigenvalues
+
+    
+
+    vals,vecs = eigsh(H,k=k,which='SM')
+
+    vec_imp = lambda n: vecs.T[n].reshape((N,N))
+
+
+# Plotting
+
+    axs[i].imshow(np.round(np.abs(vec_imp(5)),3) == 0.00, cmap='gray',label='Nodal Lines')
+    axs[i].set_xlabel('x')
+    axs[i].set_ylabel('y')
+    axs[i].set_title(f'n={n_range[i]}')
+plt.suptitle('Nodal Lines of Eigenstates in 2D Infinite Potential Wells')
+plt.show()
