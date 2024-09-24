@@ -1,0 +1,1 @@
+This is an active project aimed to demonstrate why circular infinite potential wells have some closed nodal line eigenvectors (lines in the eigenstate where the probability of finding the particle is 0).
